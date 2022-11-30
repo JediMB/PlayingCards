@@ -84,7 +84,7 @@ namespace ConsoleGUI
             {
                 int dmMsg = DeleteMenu(sysMenu, 0xF000, 0x00000000);
 
-                PrintInfo($"Window resizing has{(dmMsg == 1 ? "" : " NOT")} been disabled.");
+                LogBox.Print($"Window resizing has{(dmMsg == 1 ? "" : " NOT")} been disabled.");
             }
         }
 
@@ -94,21 +94,6 @@ namespace ConsoleGUI
         private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool pRevert);
         [DllImport("user32.dll")]
         private static extern int DeleteMenu(IntPtr hMenu, int nPosition, int wFlags);
-
-        /// <summary>
-        /// Adds text to the textbox at the top of the console. Useful for error messages, instructions, etc.
-        /// </summary>
-        public static void PrintInfo(string output)
-        {
-            string appendedText = (logBox.Text != string.Empty)
-                ? "\n" + logBox.Text
-                : string.Empty;
-
-            logBox.Text = $"({_logEntries:00}) : {output}{appendedText}";
-            _logEntries++;
-
-            logBox.Render();
-        }
 
         /// <summary>
         /// Writes a single char at a the specified position in the console buffer
@@ -240,7 +225,7 @@ namespace ConsoleGUI
             }
             catch (ArgumentException ex)
             {
-                PrintInfo("GUI.DrawLine error: " + ex.Message);
+                LogBox.Print("GUI.DrawLine error: " + ex.Message);
             }
         }
 
@@ -288,7 +273,7 @@ namespace ConsoleGUI
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                PrintInfo("GUI.DrawLine error: " + ex.Message);
+                LogBox.Print("GUI.DrawLine error: " + ex.Message);
             }
         }
 
@@ -361,7 +346,7 @@ namespace ConsoleGUI
             }
             catch (ArgumentException ex)
             {
-                PrintInfo("GUI.DrawColumn error: " + ex.Message);
+                LogBox.Print("GUI.DrawColumn error: " + ex.Message);
             }
 
         }
@@ -410,7 +395,7 @@ namespace ConsoleGUI
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                PrintInfo("GUI.DrawColumn error: " + ex.Message);
+                LogBox.Print("GUI.DrawColumn error: " + ex.Message);
             }
         }
 
@@ -483,7 +468,7 @@ namespace ConsoleGUI
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                PrintInfo("GUI.DrawBox error: " + ex.Message);
+                LogBox.Print("GUI.DrawBox error: " + ex.Message);
             }
         }
     }
