@@ -25,6 +25,12 @@ namespace PlayingCardsApp
         private string menuLine = string.Empty;
 
         private Data data;
+
+        private GUI.TextBoxGroup labelBoxes;
+        private GUI.TextBoxGroup menuBoxes;
+        private GUI.TextBoxGroup scrollBoxes;
+
+        private GUI.TextBoxGroup cardsPlayer;
         
         #region Singleton Instantiation
         private static readonly Logic instance = new();
@@ -38,10 +44,12 @@ namespace PlayingCardsApp
             // Initialization of app logic here
             LoadContent();
             GUI.Initialize(data.Name);
+
             DrawGUI();
+
             CreateContent();
 
-            GUI.Controls.RefreshTextbox();
+            menuBoxes.RefreshTextbox();
         }
 
         /// <summary>
@@ -64,7 +72,7 @@ namespace PlayingCardsApp
         private void DrawGUI()
         {
             if (guiDrawn)
-                GUI.PrintInfo("GUI refreshed.");
+                GUI.LogBox.Print("GUI refreshed.");
 
             guiDrawn = true;
 
@@ -85,30 +93,53 @@ namespace PlayingCardsApp
         /// <summary>
         /// Creates static text fields and interactable, scrolling text boxes on top of previously drawn GUI elements.
         /// </summary>
+        [MemberNotNull(nameof(labelBoxes), nameof(menuBoxes), nameof(scrollBoxes), nameof(cardsPlayer))]
         private void CreateContent()
         {
             if (contentCreated)
                 throw new Exception("Tried to run CreateContent more than once.");
-            
+
             contentCreated = true;
-            
+
+            labelBoxes = GUI.TextBoxGroup.Factory.CreateLabelGroup();
+            menuBoxes = GUI.TextBoxGroup.Factory.CreateSelectableGroup();
+            scrollBoxes = GUI.TextBoxGroup.Factory.CreateScrollingGroup();
+
+            cardsPlayer = GUI.TextBoxGroup.Factory.CreateLabelSequence(17, true, 3, 10, 7, 6, ConsoleColor.Gray, ConsoleColor.Black);
+
             // Create textboxes here
 
-            GUI.CreateTextbox(12, 1, 104, 5, data.Logo, null, ConsoleColor.Cyan);
-            GUI.CreateTextbox(GUI.GetGUIWidth/2 - data.Tagline.Length/2, 7, data.Tagline.Length, 1, data.Tagline);
+            labelBoxes.Add(12, 1, 104, 5, data.Logo, null, ConsoleColor.Cyan);
+            labelBoxes.Add(GUI.GetGUIWidth/2 - data.Tagline.Length/2, 7, data.Tagline.Length, 1, data.Tagline);
 
-            GUI.CreateTextbox(2, 9, 8, 1, " PLAYER ", ConsoleColor.Gray, ConsoleColor.Black);
-            GUI.CreateTextbox(3, 10, 7, 6, data.cardASCII[0, 0], ConsoleColor.Gray, ConsoleColor.Black);
-            GUI.CreateTextbox(10, 10, 7, 6, data.cardASCII[1, 0], ConsoleColor.Gray, ConsoleColor.DarkRed);
-            GUI.CreateTextbox(17, 10, 7, 6, data.cardASCII[2, 0], ConsoleColor.Gray, ConsoleColor.DarkRed);
-            GUI.CreateTextbox(24, 10, 7, 6, data.cardASCII[3, 0], ConsoleColor.Gray, ConsoleColor.Black);
+            labelBoxes.Add(2, 9, 8, 1, " PLAYER ", ConsoleColor.Gray, ConsoleColor.Black);
 
-            GUI.CreateTextbox(2, 16, 11, 1, " THE HOUSE ", ConsoleColor.Gray, ConsoleColor.Black);
+            int suit = 0;
+            for (int i = 0; i < cardsPlayer.Count; i++)
+            {
+                if (suit == 0 || suit == 3)
+                    cardsPlayer[i].TextColor = ConsoleColor.Black;
+                else
+                    cardsPlayer[i].TextColor = ConsoleColor.DarkRed;
 
-            GUI.CreateTextbox(1, 25, 16, 15, "New game", null, null, GUI.Interactivity.ScrollAndSelect);
-            GUI.CreateTextbox(18, 25, GUI.GetGUIWidth - 19, 15, "Would you like to play a game?", null, null, GUI.Interactivity.ScrollOnly);
+                cardsPlayer[i].Text = data.cardASCII[suit, 0];
+                
+                suit++;
+                if (suit > 3) suit = 0;
+            }
 
-            GUI.CreateTextbox(2, GUI.GetGUIHeight - 5, GUI.GetGUIWidth - 4, 3, data.Description + "\n\n" + data.Copyright);
+            //labelBoxes.Add(3, 10, 7, 6, data.cardASCII[0, 0], ConsoleColor.Gray, ConsoleColor.Black);
+            //labelBoxes.Add(10, 10, 7, 6, data.cardASCII[1, 0], ConsoleColor.Gray, ConsoleColor.DarkRed);
+            //labelBoxes.Add(17, 10, 7, 6, data.cardASCII[2, 0], ConsoleColor.Gray, ConsoleColor.DarkRed);
+            //labelBoxes.Add(24, 10, 7, 6, data.cardASCII[3, 0], ConsoleColor.Gray, ConsoleColor.Black);
+
+            labelBoxes.Add(2, 16, 11, 1, " THE HOUSE ", ConsoleColor.Gray, ConsoleColor.Black);
+
+            menuBoxes.Add(1, 25, 16, 15, "New game");
+
+            scrollBoxes.Add(18, 25, GUI.GetGUIWidth - 19, 15, "Would you like to play a game?");
+
+            labelBoxes.Add(2, GUI.GetGUIHeight - 5, GUI.GetGUIWidth - 4, 3, data.Description + "\n\n" + data.Copyright);
         }
         #endregion
 
@@ -130,15 +161,15 @@ namespace PlayingCardsApp
             switch (menuState)
             {
                 case MenuState.MainMenu:
-                    GUI.Controls.WriteTextbox("Blackjack\nPoker\nQuit");
+                    menuBoxes.WriteTextbox("Blackjack\nPoker\nQuit");
                     break;
 
                 case MenuState.Blackjack:
-                    GUI.Controls.WriteTextbox("Play\nHigh score\nMain menu\nQuit");
+                    menuBoxes.WriteTextbox("Play\nHigh score\nMain menu\nQuit");
                     break;
 
                 case MenuState.PlayingBlackjack:
-                    GUI.Controls.WriteTextbox("Hit me?");
+                    menuBoxes.WriteTextbox("Hit me?");
                     break;
             }
         }
@@ -169,7 +200,7 @@ namespace PlayingCardsApp
                             return;
 
                         default:
-                            GUI.PrintInfo($"Unknown menu command: {menuLine}");
+                            GUI.LogBox.Print($"Unknown menu command: {menuLine}");
                             break;
                     }
                     return;
@@ -185,7 +216,7 @@ namespace PlayingCardsApp
                             return;
 
                         default:
-                            GUI.PrintInfo($"Unknown menu command: {menuLine}");
+                            GUI.LogBox.Print($"Unknown menu command: {menuLine}");
                             break;
                     }
                     return;
@@ -203,12 +234,12 @@ namespace PlayingCardsApp
             {
                 case ConsoleKey.Q:              quit = true; break;
 
-                case ConsoleKey.PageUp:         GUI.Controls.LogBox.ScrollUp(); break;
-                case ConsoleKey.PageDown:       GUI.Controls.LogBox.ScrollDown(); break;
-                case ConsoleKey.UpArrow:        GUI.Controls.PrevSelection(); break;
-                case ConsoleKey.DownArrow:      GUI.Controls.NextSelection(); break;
-                case ConsoleKey.LeftArrow:      GUI.Controls.PrevTextbox(); break;
-                case ConsoleKey.RightArrow:     GUI.Controls.NextTextbox(); break;
+                case ConsoleKey.PageUp:         GUI.LogBox.ScrollUp(); break;
+                case ConsoleKey.PageDown:       GUI.LogBox.ScrollDown(); break;
+                case ConsoleKey.UpArrow:        menuBoxes.PrevSelection(); break;
+                case ConsoleKey.DownArrow:      menuBoxes.NextSelection(); break;
+                case ConsoleKey.LeftArrow:      menuBoxes.PrevTextbox(); break;
+                case ConsoleKey.RightArrow:     menuBoxes.NextTextbox(); break;
                 case ConsoleKey.Enter:          MenuSelection(); break;
                 //case ConsoleKey.Delete:         GUI.Controls.ClearTextbox(); break;
                 //case ConsoleKey.Insert:         GUI.Controls.InsertIntoTextbox("Here comes a new challenger!"); break;
@@ -217,7 +248,7 @@ namespace PlayingCardsApp
 
         private void MenuSelection()
         {
-            menuLine = GUI.Controls.ReadSelection();
+            menuLine = menuBoxes.ReadSelection();
 
             if (menuLine != string.Empty)
                 menuLineSelected = true;

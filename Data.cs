@@ -98,8 +98,6 @@ namespace PlayingCardsApp
                         cardASCII[suit, rank] += line.Substring(rank * cardWidth, cardWidth) + (srcLine == 5 ? "" : "\n");
                 }
             }
-
-            // TODO: Card ASCII have been read into strings here. Time to draw them in the app!
         }
         #endregion
     }
